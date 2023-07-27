@@ -7,7 +7,7 @@ import mysql from "mysql2";
 import bodyParser from "body-parser";
 import fileUpload from "express-fileupload";
 import { v2 as cloudinary } from "cloudinary";
-
+import cookieParser from "cookie-parser";
 config();
 
 const app: Application = express();
@@ -20,6 +20,9 @@ const corsOptions: CorsOptions = {
   credentials: true, // Allow credentials (cookies, authorization headers, etc.)
 };
 
+// Enable CORS middleware with options
+app.use(cors(corsOptions));
+
 // DATABASE (TODO: Use sessions)
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
@@ -27,34 +30,23 @@ const pool = mysql.createPool({
   database: process.env.DB_NAME,
   password: process.env.DB_PASSWORD,
 });
-          
+
+// CLOUD    
 cloudinary.config({ 
   cloud_name: process.env.CLOUD_NAME, 
   api_key: process.env.API_KEY, 
   api_secret: process.env.API_SECRET, 
 });
 
+app.use(cookieParser());
+
 export const cloud = cloudinary;
 
-const sql = "SELECT * FROM users";
-
-pool.execute(sql, (err: Error, result: void) => {
-  if (err || (err != null)) {
-    console.log("Failed to connect to the database", err);
-  }
-  console.log("Succesfully connected to the database", { result });
-});
-
-app.use(fileUpload({
-  useTempFiles: true,
-}));
+app.use(fileUpload({}));
 
 export const databasePool = pool.promise();
 
-// Enable CORS middleware with options
-app.use(cors(corsOptions));
-
-app.use(bodyParser.json()); // For parsing application/json
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use("/", routes);

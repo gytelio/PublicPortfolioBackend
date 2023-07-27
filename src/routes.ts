@@ -1,47 +1,16 @@
-import express, { type Request, type Response, type NextFunction, type Router } from "express";
-import { getUsers, setFile, updateFile, deleteFile, getFiles } from "./controllers/DatabaseController";
+import express from "express";
+import { GalleryControllers, AuthControllers } from "./controllers/Main";
+import isAuthenticatedMiddleware from "./middleware/Auth";
 
-const router: Router = express.Router();
+const router = express.Router();
+router.get("/", AuthControllers.welcome);
+router.post("/login", AuthControllers.loginUser);
+router.post("/register", isAuthenticatedMiddleware, AuthControllers.registerUser);
+router.get("/logout", isAuthenticatedMiddleware, AuthControllers.logoutUser);
 
-// eslint-disable-next-line @typescript-eslint/no-misused-promises
-router.get("/posts", async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    await getUsers(req, res, next);
-  } catch (err) {
-    next(err);
-  }
-});
-
-router.post("/photo", async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    await setFile(req, res, next);
-  } catch (err) {
-    next(err);
-  }
-});
-
-router.post("/photo/update/:public_id", async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    await updateFile(req, res, next);
-  } catch (err) {
-    next(err);
-  }
-});
-
-router.delete("/photo/:public_id", async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    await deleteFile(req, res, next);
-  } catch (err) {
-    next(err);
-  }
-});
-
-router.get("/photos", async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    await getFiles(req, res, next);
-  } catch (err) {
-    next(err);
-  }
-});
+router.get("/photos", GalleryControllers.getFiles);
+router.post("/photo", isAuthenticatedMiddleware, GalleryControllers.setFile);
+router.post("/photo/update/:public_id", isAuthenticatedMiddleware, GalleryControllers.updateFile);
+router.delete("/photo/:public_id", isAuthenticatedMiddleware, GalleryControllers.deleteFile);
 
 export default router;
