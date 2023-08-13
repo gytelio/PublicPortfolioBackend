@@ -42,7 +42,10 @@ app.use(cookieParser());
 
 export const cloud = cloudinary;
 
-app.use(fileUpload({}));
+app.use(fileUpload({
+  useTempFiles : true,
+  tempFileDir : "/tmp/",
+}));
 
 export const databasePool = pool.promise();
 

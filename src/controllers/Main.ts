@@ -61,7 +61,7 @@ export class GalleryControllers {
         return;
       }
       const photos = req.files.file;
-      const saved = await savePhoto(photos);
+      const saved = await savePhoto(photos, req.params.main_index ? Number(req.params.main_index) : null);
       console.log("Succesfully saved to cloud and database");
       res.send(saved);
     } catch (err) {
@@ -74,11 +74,18 @@ export class GalleryControllers {
         res.status(400).send("No file uploaded");
         return;
       }
-      const photos = Array.isArray(req.files.file) ? req.files.file[0] : req.files.file;
-      const updated = await updatePhoto(photos, req.params.public_id);
+      const photo = Array.isArray(req.files.file) ? req.files.file[0] : req.files.file;
+      if (!photo.tempFilePath) {
+        throw new Error("File malformed, no file path");
+      }
+      const updated = await updatePhoto(photo, req.params.public_id);
+      if (!updated) {
+        throw new Error("Something went wrong");
+      }
       console.log("Succesfully updated cloud and database");
       res.send(updated);
     } catch (err) {
+      console.log(err);
       res.status(500).send({ message: `Internal Server Error.\n\n${err}` });
     }
   }

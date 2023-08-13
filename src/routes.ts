@@ -9,7 +9,7 @@ router.post("/register", isAuthenticatedMiddleware, AuthControllers.registerUser
 router.get("/logout", isAuthenticatedMiddleware, AuthControllers.logoutUser);
 
 router.get("/photos", GalleryControllers.getFiles);
-router.post("/photo", isAuthenticatedMiddleware, GalleryControllers.setFile);
+router.post("/photo/:main_index", isAuthenticatedMiddleware, GalleryControllers.setFile);
 router.post("/photo/update/:public_id", isAuthenticatedMiddleware, GalleryControllers.updateFile);
 router.delete("/photo/:public_id", isAuthenticatedMiddleware, GalleryControllers.deleteFile);
 
